@@ -1,0 +1,72 @@
+version: "3"
+
+services:
+  nginx:
+    image: nave3/laravel:nginx-1.0.0
+    container_name: laravel_nginx
+    build:
+      context: .
+      dockerfile: ./docker/nginx/Dockerfile
+    volumes:
+      - ./public:/var/www/html/public
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+    tty: true
+
+  app:
+    image: nave3/laravel:app-1.0.0
+    container_name: laravel_app
+    build:
+      context: .
+      dockerfile: ./docker/app/Dockerfile
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "5173:5173"
+    depends_on:
+      - db
+    tty: true
+
+  db:
+    image: nave3/laravel:db-1.0.0
+    container_name: laravel_db
+    build:
+      context: .
+      dockerfile: ./docker/db/Dockerfile
+    environment:
+      MARIADB_DATABASE: app
+      MARIADB_ROOT_PASSWORD: pass
+    ports:
+      - "3306:3306"
+    tty: true
+
+  phpmyadmin:
+    image: nave3/laravel:phpmyadmin-1.0.0
+    container_name: laravel_phpmyadmin
+    build:
+      context: .
+      dockerfile: ./docker/phpmyadmin/Dockerfile
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: pass
+      PMA_VERBOSE: phpmyadmin
+      PMA_PORT: 3306
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    tty: true
+
+  redis:
+    image: nave3/laravel:redis-1.0.0
+    container_name: laravel_redis
+    build:
+      context: .
+      dockerfile: ./docker/redis/Dockerfile
+    ports:
+      - "6379:6379"
+    tty: true
